@@ -1,5 +1,5 @@
 <p align='center'>
-  <img src='https://user-images.githubusercontent.com/425716/44536990-ad3f9f80-a6cb-11e8-9a1d-eeb7f92bbdae.png' width='400'/>
+  <img src='https://user-images.githubusercontent.com/425716/44544295-c94d3c00-a6df-11e8-9de1-8166795fda27.png' width='400'/>
   <p align='center'>Streaming GTFS and GTFS-RT parser for node.</p>
 </p>
 
