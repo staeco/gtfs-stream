@@ -1,5 +1,6 @@
+import pumpify from 'pumpify'
+import merge from 'merge2'
 import duplexify from 'duplexify'
-import pump from 'pump'
 import { basename, extname } from 'path'
 import through2 from 'through2'
 import zip from 'unzipper'
@@ -8,25 +9,29 @@ import { singular } from 'pluralize'
 import eos from 'end-of-stream'
 
 export default () => {
-  const out = through2.obj()
-  const unzip = zip.Parse()
-  unzip.on('entry', (entry) => {
-    const ext = extname(entry.path)
-    if (ext !== '.txt') return entry.autodrain()
-    const thisFile = pump(
-      entry,
-      csv(),
-      through2.obj((data, _, cb) => {
-        cb(null, {
-          type: singular(basename(entry.path, ext)),
-          data
-        })
-      }))
-    thisFile.pipe(out, { end: false })
-  })
+  const out = merge({ end: false })
 
-  eos(unzip, () => {
-    out.push(null)
-  })
-  return duplexify.obj(unzip, out, { end: false })
+  const dataStream = pumpify.obj(
+    zip.Parse(),
+    through2.obj((entry, _, cb) => {
+      const ext = extname(entry.path)
+      if (ext !== '.txt') {
+        entry.autodrain().then(() => cb()).catch(cb)
+        return
+      }
+      const file = pumpify.obj(
+        entry,
+        csv(),
+        through2.obj((data, _, cb) => {
+          cb(null, {
+            type: singular(basename(entry.path, ext)),
+            data
+          })
+        }))
+      out.add(file)
+      eos(file, cb)
+    }))
+
+  eos(dataStream, () => out.push(null))
+  return duplexify.obj(dataStream, out, { end: false })
 }

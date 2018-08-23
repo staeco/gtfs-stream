@@ -2,13 +2,17 @@
 
 exports.__esModule = true;
 
+var _pumpify = require('pumpify');
+
+var _pumpify2 = _interopRequireDefault(_pumpify);
+
+var _merge = require('merge2');
+
+var _merge2 = _interopRequireDefault(_merge);
+
 var _duplexify = require('duplexify');
 
 var _duplexify2 = _interopRequireDefault(_duplexify);
-
-var _pump = require('pump');
-
-var _pump2 = _interopRequireDefault(_pump);
 
 var _path = require('path');
 
@@ -33,24 +37,26 @@ var _endOfStream2 = _interopRequireDefault(_endOfStream);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = () => {
-  const out = _through2.default.obj();
-  const unzip = _unzipper2.default.Parse();
-  unzip.on('entry', entry => {
+  const out = (0, _merge2.default)({ end: false });
+
+  const dataStream = _pumpify2.default.obj(_unzipper2.default.Parse(), _through2.default.obj((entry, _, cb) => {
     const ext = (0, _path.extname)(entry.path);
-    if (ext !== '.txt') return entry.autodrain();
-    const thisFile = (0, _pump2.default)(entry, (0, _csvParser2.default)(), _through2.default.obj((data, _, cb) => {
+    if (ext !== '.txt') {
+      entry.autodrain().then(() => cb()).catch(cb);
+      return;
+    }
+    const file = _pumpify2.default.obj(entry, (0, _csvParser2.default)(), _through2.default.obj((data, _, cb) => {
       cb(null, {
         type: (0, _pluralize.singular)((0, _path.basename)(entry.path, ext)),
         data
       });
     }));
-    thisFile.pipe(out, { end: false });
-  });
+    out.add(file);
+    (0, _endOfStream2.default)(file, cb);
+  }));
 
-  (0, _endOfStream2.default)(unzip, () => {
-    out.push(null);
-  });
-  return _duplexify2.default.obj(unzip, out, { end: false });
+  (0, _endOfStream2.default)(dataStream, () => out.push(null));
+  return _duplexify2.default.obj(dataStream, out, { end: false });
 };
 
 module.exports = exports['default'];
