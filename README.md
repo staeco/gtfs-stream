@@ -17,7 +17,7 @@ npm install gtfs-stream --save
 ```js
 import gtfs from 'gtfs-stream'
 
-request.get('https://developers.google.com/transit/gtfs/examples/sample-feed.zip')
+request.get('https://developers.google.com/transit/gtfs/examples/sample-feed.zip') // or any other way of getting the data stream
   .pipe(gtfs())
   .on('data', (entity) => {
     console.log(entity)
@@ -29,8 +29,7 @@ request.get('https://developers.google.com/transit/gtfs/examples/sample-feed.zip
 ```js
 import gtfs from 'gtfs-stream'
 
-request.get('http://datamine.mta.info/mta_esi.php')
-  .query({ key: 'your-key-here' })
+request.get('http://datamine.mta.info/mta_esi.php') // or any other way of getting the data stream
   .pipe(gtfs.rt())
   .on('data', (entity) => {
     console.log(entity)
