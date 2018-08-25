@@ -42,8 +42,8 @@ exports.default = () => {
   const dataStream = _pumpify2.default.obj(_unzipper2.default.Parse(), _through2.default.obj((entry, _, cb) => {
     const ext = (0, _path.extname)(entry.path);
     if (ext !== '.txt') {
-      entry.autodrain().then(() => cb()).catch(cb);
-      return;
+      entry.autodrain();
+      return cb();
     }
     const file = _pumpify2.default.obj(entry, (0, _csvParser2.default)(), _through2.default.obj((data, _, cb) => {
       cb(null, {

@@ -16,8 +16,8 @@ export default () => {
     through2.obj((entry, _, cb) => {
       const ext = extname(entry.path)
       if (ext !== '.txt') {
-        entry.autodrain().then(() => cb()).catch(cb)
-        return
+        entry.autodrain()
+        return cb()
       }
       const file = pumpify.obj(
         entry,
