@@ -15,4 +15,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _plain2.default.rt = _rt2.default;
 
 exports.default = _plain2.default;
-module.exports = exports['default'];
+module.exports = exports.default;

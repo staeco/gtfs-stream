@@ -59,4 +59,4 @@ exports.default = () => {
   return _duplexify2.default.obj(dataStream, out, { end: false });
 };
 
-module.exports = exports['default'];
+module.exports = exports.default;
