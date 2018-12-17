@@ -93,5 +93,5 @@ Only one of either trip_update, vehicle, or alert will be present in any given e
 [npm-url]: https://npmjs.org/package/gtfs-stream
 [npm-image]: http://img.shields.io/npm/v/gtfs-stream.svg
 
-[travis-url]: https://travis-ci.org/contra/gtfs-stream
-[travis-image]: https://travis-ci.org/contra/gtfs-stream.png?branch=master
+[travis-url]: https://travis-ci.org/staeco/gtfs-stream
+[travis-image]: https://travis-ci.org/staeco/gtfs-stream.png?branch=master
