@@ -1,6 +1,6 @@
 {
   "name": "gtfs-stream",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Streaming GTFS and GTFS-RT parser for node",
   "main": "dist/index.js",
   "keywords": [
@@ -31,7 +31,7 @@
     "build": "babel src --out-dir dist",
     "clean": "rimraf dist",
     "lint": "eslint src",
-    "test": "npm run-script lint && mocha --require babel-register --recursive --reporter spec"
+    "test": "mocha --require babel-register --recursive --reporter spec && npm run-script lint"
   },
   "devDependencies": {
     "babel-cli": "^6.4.0",
@@ -183,7 +183,7 @@
     "merge2": "^1.2.2",
     "pluralize": "^7.0.0",
     "pumpify": "^1.5.1",
-    "strip-bom-stream": "^3.0.0",
+    "remove-bom-stream": "^1.2.0",
     "through2": "^3.0.0",
     "unzipper": "^0.9.3"
   }
