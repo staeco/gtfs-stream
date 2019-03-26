@@ -7,11 +7,13 @@ import zip from 'unzipper'
 import csv from 'csv-parser'
 import { singular } from 'pluralize'
 import eos from 'end-of-stream'
+import stripBom from 'strip-bom-stream'
 
 export default () => {
   const out = merge({ end: false })
 
   const dataStream = pumpify.obj(
+    stripBom(),
     zip.Parse(),
     through2.obj((entry, _, cb) => {
       const ext = extname(entry.path)
