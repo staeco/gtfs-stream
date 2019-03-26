@@ -34,6 +34,10 @@ var _endOfStream = require('end-of-stream');
 
 var _endOfStream2 = _interopRequireDefault(_endOfStream);
 
+var _removeBomStream = require('remove-bom-stream');
+
+var _removeBomStream2 = _interopRequireDefault(_removeBomStream);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = () => {
@@ -45,7 +49,7 @@ exports.default = () => {
       entry.autodrain();
       return cb();
     }
-    const file = _pumpify2.default.obj(entry, (0, _csvParser2.default)(), _through2.default.obj((data, _, cb) => {
+    const file = _pumpify2.default.obj(entry, (0, _removeBomStream2.default)(), (0, _csvParser2.default)(), _through2.default.obj((data, _, cb) => {
       cb(null, {
         type: (0, _pluralize.singular)((0, _path.basename)(entry.path, ext)),
         data
