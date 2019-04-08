@@ -20,20 +20,21 @@ export default () => {
         entry.autodrain()
         return cb()
       }
+      const type = singular(basename(entry.path, ext))
       const file = pumpify.obj(
         entry,
         bom(),
         csv(),
         through2.obj((data, _, cb) => {
-          cb(null, {
-            type: singular(basename(entry.path, ext)),
-            data
-          })
+          cb(null, { type, data })
         }))
       out.add(file)
       eos(file, cb)
     }))
 
-  eos(dataStream, () => out.push(null))
-  return duplexify.obj(dataStream, out, { end: false })
+  eos(dataStream, () => {
+    out.push(null)
+    out.end()
+  })
+  return duplexify.obj(dataStream, out)
 }

@@ -49,18 +49,19 @@ exports.default = () => {
       entry.autodrain();
       return cb();
     }
+    const type = (0, _pluralize.singular)((0, _path.basename)(entry.path, ext));
     const file = _pumpify2.default.obj(entry, (0, _removeBomStream2.default)(), (0, _csvParser2.default)(), _through2.default.obj((data, _, cb) => {
-      cb(null, {
-        type: (0, _pluralize.singular)((0, _path.basename)(entry.path, ext)),
-        data
-      });
+      cb(null, { type, data });
     }));
     out.add(file);
     (0, _endOfStream2.default)(file, cb);
   }));
 
-  (0, _endOfStream2.default)(dataStream, () => out.push(null));
-  return _duplexify2.default.obj(dataStream, out, { end: false });
+  (0, _endOfStream2.default)(dataStream, () => {
+    out.push(null);
+    out.end();
+  });
+  return _duplexify2.default.obj(dataStream, out);
 };
 
 module.exports = exports.default;
