@@ -30,15 +30,29 @@ var _csvParser2 = _interopRequireDefault(_csvParser);
 
 var _pluralize = require('pluralize');
 
-var _endOfStream = require('end-of-stream');
-
-var _endOfStream2 = _interopRequireDefault(_endOfStream);
+var _stream = require('stream');
 
 var _removeBomStream = require('remove-bom-stream');
 
 var _removeBomStream2 = _interopRequireDefault(_removeBomStream);
 
+var _lodash = require('lodash.pickby');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _parseDecimalNumber = require('parse-decimal-number');
+
+var _parseDecimalNumber2 = _interopRequireDefault(_parseDecimalNumber);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// light mapping
+const mapValues = ({ value }) => {
+  if (value === '') return;
+  const n = (0, _parseDecimalNumber2.default)(value);
+  if (!isNaN(n)) return n;
+  return value;
+};
 
 exports.default = () => {
   const out = (0, _merge2.default)({ end: false });
@@ -50,14 +64,14 @@ exports.default = () => {
       return cb();
     }
     const type = (0, _pluralize.singular)((0, _path.basename)(entry.path, ext));
-    const file = _pumpify2.default.obj(entry, (0, _removeBomStream2.default)(), (0, _csvParser2.default)(), _through2.default.obj((data, _, cb) => {
-      cb(null, { type, data });
+    const file = _pumpify2.default.obj(entry, (0, _removeBomStream2.default)(), (0, _csvParser2.default)({ mapValues }), _through2.default.obj((data, _, cb) => {
+      cb(null, { type, data: (0, _lodash2.default)(data) }); // to plain js, out of the CSV format
     }));
     out.add(file);
-    (0, _endOfStream2.default)(file, cb);
+    (0, _stream.finished)(file, cb);
   }));
 
-  (0, _endOfStream2.default)(dataStream, () => {
+  (0, _stream.finished)(dataStream, () => {
     out.push(null);
     out.end();
   });

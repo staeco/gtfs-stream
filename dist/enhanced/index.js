@@ -10,9 +10,17 @@ var _pumpify = require('pumpify');
 
 var _pumpify2 = _interopRequireDefault(_pumpify);
 
-var _endOfStream = require('end-of-stream');
+var _routeTypes = require('./routeTypes');
 
-var _endOfStream2 = _interopRequireDefault(_endOfStream);
+var _routeTypes2 = _interopRequireDefault(_routeTypes);
+
+var _locationTypes = require('./locationTypes');
+
+var _locationTypes2 = _interopRequireDefault(_locationTypes);
+
+var _wheelchairTypes = require('./wheelchairTypes');
+
+var _wheelchairTypes2 = _interopRequireDefault(_wheelchairTypes);
 
 var _plain = require('../plain');
 
@@ -20,17 +28,12 @@ var _plain2 = _interopRequireDefault(_plain);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// everything is streaming but ultimately stops/routes need to wait for their shapes or stop times
-// to come in asynchronously, so we do need to keep a buffer of those around while we still let other things process
-// if there are more than 10K stops or routes this number will still be too low, but this should cover most cases
-const bigStream = _through2.default.ctor({ objectMode: true, highWaterMark: 10000 });
-
 // turn shapes into arrays of coordinates for future reference
 const collectShapes = () => {
   const out = _through2.default.obj((o, _, cb) => {
     if (o.type !== 'shape') return cb(null, o); // pass it through
     const id = o.data.shape_id;
-    const coord = [parseFloat(o.data.shape_pt_lon), parseFloat(o.data.shape_pt_lat)];
+    const coord = [o.data.shape_pt_lon, o.data.shape_pt_lat];
     if (out.data[id]) {
       out.data[id].push(coord);
     } else {
@@ -39,9 +42,6 @@ const collectShapes = () => {
     cb();
   });
   out.data = {};
-  out.promise = () => new Promise((resolve, reject) => {
-    (0, _endOfStream2.default)(out, err => err ? reject(err) : resolve(out.data));
-  });
   return out;
 };
 
@@ -50,53 +50,69 @@ const collectStopTimes = () => {
   const out = _through2.default.obj((o, _, cb) => {
     if (o.type !== 'stop_time') return cb(null, o); // pass it through
     const stopId = o.data.stop_id;
-    const routeId = o.data.route_id;
-    if (out.data.byStop[stopId]) {
-      out.data.byStop[stopId].push(o.data);
-    } else {
-      out.data.byStop[stopId] = [o.data];
-    }
-    if (out.data.byRoute[routeId]) {
-      out.data.byRoute[routeId].push(o.data);
-    } else {
-      out.data.byRoute[routeId] = [o.data];
+    //console.log('stop id', stopId)
+    if (stopId) {
+      if (out.data[stopId]) {
+        out.data[stopId].push(o.data);
+      } else {
+        out.data[stopId] = [o.data];
+      }
     }
     cb();
   });
-  out.data = {
-    byRoute: {},
-    byStop: {}
-  };
-  out.promise = () => new Promise((resolve, reject) => {
-    (0, _endOfStream2.default)(out, err => err ? reject(err) : resolve(out.data));
-  });
+  out.data = {};
   return out;
 };
 
 // shape everything leaving the stream
-const formatObjects = ({ shapeCollector, stopTimeCollector }) => {
-  const format = async o => {
+const queue = o => o.data.shape_id || o.type === 'stop' || o.data.route_type || o.data.location_type || o.data.vehicle_type || o.data.wheelchair_boarding;
+
+const formatObjects = ({ shapes, stopTimes }) => {
+  const format = o => {
     // anything with a shape, replace it with the actual shape
     if (o.data.shape_id) {
-      const shapes = await shapeCollector();
       o.data.path = {
         type: 'LineString',
         coordinates: shapes[o.data.shape_id]
       };
-      delete o.data.shape_id;
     }
+    // schedules
     if (o.type === 'stop') {
-      const times = await stopTimeCollector();
-      o.data.schedule = times.byStop[o.data.stop_id];
+      //console.log('fmt stopid', o.data.stop_id)
+      const times = stopTimes[o.data.stop_id];
+      if (times) o.data.schedule = times;
     }
-    if (o.type === 'route') {
-      const times = await stopTimeCollector();
-      o.data.schedule = times.byRoute[o.data.route_id];
+    if (o.data.route_type) {
+      const humanRouteType = _routeTypes2.default[o.data.route_type];
+      if (humanRouteType) o.data.route_type = humanRouteType.toLowerCase();
+    }
+    if (o.data.vehicle_type) {
+      const humanVehicleType = _routeTypes2.default[o.data.vehicle_type];
+      if (humanVehicleType) o.data.vehicle_type = humanVehicleType.toLowerCase();
+    }
+    if (o.data.location_type) {
+      const humanLocationType = _locationTypes2.default[o.data.location_type || '0'];
+      if (humanLocationType) o.data.location_type = humanLocationType.toLowerCase();
+    }
+    if (o.data.wheelchair_boarding) {
+      o.data.wheelchair_boarding = _wheelchairTypes2.default[o.data.wheelchair_boarding];
     }
     return o;
   };
-  return bigStream((o, _, cb) => {
-    format(o).then(r => cb(null, r)).catch(cb);
+
+  const waiting = [];
+  return _through2.default.obj((o, _, cb) => {
+    const shouldQueue = queue(o);
+    if (shouldQueue) {
+      waiting.push(o);
+      return cb();
+    }
+    cb(null, o);
+  }, function (cb) {
+    waiting.forEach(w => {
+      this.push(format(w));
+    });
+    cb();
   });
 };
 
@@ -104,8 +120,8 @@ exports.default = () => {
   const shapeCollector = collectShapes();
   const stopTimeCollector = collectStopTimes();
   const formatter = formatObjects({
-    shapeCollector: shapeCollector.promise,
-    stopTimeCollector: stopTimeCollector.promise
+    shapes: shapeCollector.data,
+    stopTimes: stopTimeCollector.data
   });
   return _pumpify2.default.obj((0, _plain2.default)(), shapeCollector, stopTimeCollector, formatter);
 };

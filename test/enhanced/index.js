@@ -13,12 +13,10 @@ describe('gtfs enhanced', () => {
     const res = await collect.array(stream)
     should.exist(res)
     should.equal(res.length, 71843)
-    const routes = res.filter((i) => i.type === 'route')
-    should(routes.every((i) => i.path && i.path.coordinates && i.schedule && i.schedule.length))
     const trips = res.filter((i) => i.type === 'trip')
-    should(trips.every((i) => i.path && i.path.coordinates))
+    should(trips.some((i) => i.data.path && i.data.path.coordinates)).equal(true)
     const stops = res.filter((i) => i.type === 'stop')
-    should(stops.every((i) => i.schedule && i.schedule.length))
+    should(stops.some((i) => i.data.schedule && i.data.schedule.length)).equal(true)
   })
   it('should error on invalid object', async () => {
     const sample = 'aksndflaks'

@@ -32,7 +32,7 @@ Data events emitted from the GTFS parse stream have the following shape:
 
 ## GTFS Enhanced
 
-The base GTFS format is cumbersome to work with, so the enhanced parser will do a little extra work piecing things together to make it more usable. This parser will use more memory than the base parser since it needs to collect rows and piece them together.
+The base GTFS format is cumbersome to work with, so the enhanced parser will do a little extra work piecing things together to make it more usable. This parser will use more memory than the base parser since it needs to collect rows that need formatting while it waits for other to stream in.
 
 ```js
 import gtfs from 'gtfs-stream'
@@ -49,8 +49,10 @@ request.get('https://developers.google.com/transit/gtfs/examples/sample-feed.zip
   - See https://developers.google.com/transit/gtfs/examples/gtfs-feed for the available attributes of each type
 
 Differences from the base parser:
-- `route` and `trip` types have a new `path` attribute that is a GeoJSON LineString, and `shape_id` is removed
-- `route` and `stop` types have a new `schedule` attribute that is a collection of stop times
+- `trip` types have a new `path` attribute that is a GeoJSON LineString, and `shape_id` is removed
+- `stop` types have a new `schedule` attribute that is a collection of stop times
+- `route` types have a human-readable `route_type`
+- `stop` types have a human-readable `vehicle_type`, `location_type`, and `wheelchair_boarding`
 - No `shape` or `stop_time` types, since they are collected into their relevant entries
 
 ## GTFS-RT

@@ -6,9 +6,18 @@ import through2 from 'through2'
 import zip from 'unzipper'
 import csv from 'csv-parser'
 import { singular } from 'pluralize'
-import eos from 'end-of-stream'
+import { finished } from 'stream'
 import bom from 'remove-bom-stream'
+import pickBy from 'lodash.pickby'
+import parseNumber from 'parse-decimal-number'
 
+// light mapping
+const mapValues = ({ value }) => {
+  if (value === '') return
+  const n = parseNumber(value)
+  if (!isNaN(n)) return n
+  return value
+}
 export default () => {
   const out = merge({ end: false })
 
@@ -24,15 +33,15 @@ export default () => {
       const file = pumpify.obj(
         entry,
         bom(),
-        csv(),
+        csv({ mapValues }),
         through2.obj((data, _, cb) => {
-          cb(null, { type, data })
+          cb(null, { type, data: pickBy(data) }) // to plain js, out of the CSV format
         }))
       out.add(file)
-      eos(file, cb)
+      finished(file, cb)
     }))
 
-  eos(dataStream, () => {
+  finished(dataStream, () => {
     out.push(null)
     out.end()
   })
