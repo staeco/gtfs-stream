@@ -18,9 +18,9 @@ var _locationTypes = require('./locationTypes');
 
 var _locationTypes2 = _interopRequireDefault(_locationTypes);
 
-var _wheelchairTypes = require('./wheelchairTypes');
+var _wheelChairTypes = require('./wheelChairTypes');
 
-var _wheelchairTypes2 = _interopRequireDefault(_wheelchairTypes);
+var _wheelChairTypes2 = _interopRequireDefault(_wheelChairTypes);
 
 var _plain = require('../plain');
 
@@ -95,7 +95,7 @@ const formatObjects = ({ shapes, stopTimes }) => {
       if (humanLocationType) o.data.location_type = humanLocationType.toLowerCase();
     }
     if (o.data.wheelchair_boarding) {
-      o.data.wheelchair_boarding = _wheelchairTypes2.default[o.data.wheelchair_boarding];
+      o.data.wheelchair_boarding = _wheelChairTypes2.default[o.data.wheelchair_boarding];
     }
     return o;
   };

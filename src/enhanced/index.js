@@ -2,7 +2,7 @@ import through2 from 'through2'
 import pumpify from 'pumpify'
 import routeTypes from './routeTypes'
 import locationTypes from './locationTypes'
-import wheelchairTypes from './wheelchairTypes'
+import wheelchairTypes from './wheelChairTypes'
 import plain from '../plain'
 
 // turn shapes into arrays of coordinates for future reference
