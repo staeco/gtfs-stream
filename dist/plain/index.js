@@ -49,7 +49,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // light mapping
 const mapValues = ({ value }) => {
   if (value === '') return;
-  const n = (0, _parseDecimalNumber2.default)(value);
+  // parse numbers but if it contains - in the middle its a date
+  const n = value.indexOf('-') < 1 && (0, _parseDecimalNumber2.default)(value);
   if (!isNaN(n)) return n;
   return value;
 };

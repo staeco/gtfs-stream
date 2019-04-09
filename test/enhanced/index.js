@@ -6,13 +6,24 @@ import { join } from 'path'
 import enhanced from '../../src/enhanced'
 
 const gtfsFixture = join(__dirname, 'norway.zip')
+const gtfsFixture2 = join(__dirname, 'nyc.zip')
 
 describe('gtfs enhanced', () => {
-  it('should parse a feed', async () => {
+  it('should parse norway feed', async () => {
     const stream = createReadStream(gtfsFixture).pipe(enhanced())
     const res = await collect.array(stream)
     should.exist(res)
     should.equal(res.length, 71843)
+    const trips = res.filter((i) => i.type === 'trip')
+    should(trips.some((i) => i.data.path && i.data.path.coordinates)).equal(true)
+    const stops = res.filter((i) => i.type === 'stop')
+    should(stops.some((i) => i.data.schedule && i.data.schedule.length)).equal(true)
+  })
+  it('should parse nyc feed', async () => {
+    const stream = createReadStream(gtfsFixture2).pipe(enhanced())
+    const res = await collect.array(stream)
+    should.exist(res)
+    should.equal(res.length, 32123)
     const trips = res.filter((i) => i.type === 'trip')
     should(trips.some((i) => i.data.path && i.data.path.coordinates)).equal(true)
     const stops = res.filter((i) => i.type === 'stop')
