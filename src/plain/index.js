@@ -14,9 +14,9 @@ import parseNumber from 'parse-decimal-number'
 // light mapping
 const mapValues = ({ value }) => {
   if (value === '') return
-  // parse numbers but if it contains - in the middle its a date
+  // parse numbers unless it contains - in the middle
   const n = value.indexOf('-') < 1 && parseNumber(value)
-  if (!isNaN(n)) return n
+  if (typeof n === 'number' && !isNaN(n)) return n
   return value
 }
 export default () => {
