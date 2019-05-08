@@ -179,7 +179,7 @@
     "csv-parser": "^2.0.0",
     "duplexify": "^4.0.0",
     "end-of-stream": "github:isaacs/end-of-stream#custom-stream-premature-close-fix",
-    "gtfs-realtime-bindings": "^0.0.4",
+    "gtfs-realtime-bindings": "^0.0.5",
     "lodash.pickby": "^4.6.0",
     "merge2": "^1.2.2",
     "parse-decimal-number": "^1.0.0",
