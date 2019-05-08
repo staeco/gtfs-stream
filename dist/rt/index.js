@@ -20,7 +20,7 @@ exports.default = () => {
   }, function (cb) {
     const fullValue = Buffer.concat(chunks, len);
     try {
-      _gtfsRealtimeBindings.FeedMessage.decode(fullValue).entity.forEach(v => this.push(v));
+      _gtfsRealtimeBindings.transit_realtime.FeedMessage.decode(fullValue).entity.forEach(v => this.push(v));
       return cb();
     } catch (err) {
       return cb(err);
