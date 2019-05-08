@@ -1,4 +1,4 @@
-import { FeedMessage } from 'gtfs-realtime-bindings'
+import { transit_realtime } from 'gtfs-realtime-bindings'
 import through2 from 'through2'
 
 export default () => {
@@ -10,7 +10,7 @@ export default () => {
   }, function (cb) {
     const fullValue = Buffer.concat(chunks, len)
     try {
-      FeedMessage.decode(fullValue).entity.forEach((v) => this.push(v))
+      transit_realtime.FeedMessage.decode(fullValue).entity.forEach((v) => this.push(v))
       return cb()
     } catch (err) {
       return cb(err)
