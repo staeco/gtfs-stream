@@ -34,7 +34,7 @@ export default ({ raw = false } = {}) => {
       const file = pumpify.obj(
         entry,
         bom(),
-        csv({ mapValues: raw ? undefined : mapValues }),
+        csv(raw ? undefined : { mapValues }),
         through2.obj((data, _, cb) => {
           cb(null, { type, data: pickBy(data) }) // to plain js, out of the CSV format
         }))

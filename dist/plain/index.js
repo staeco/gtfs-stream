@@ -61,7 +61,7 @@ exports.default = ({ raw = false } = {}) => {
       return cb();
     }
     const type = (0, _pluralize.singular)((0, _path.basename)(entry.path, ext));
-    const file = _pumpify2.default.obj(entry, (0, _removeBomStream2.default)(), (0, _csvParser2.default)({ mapValues: raw ? undefined : mapValues }), _through2.default.obj((data, _, cb) => {
+    const file = _pumpify2.default.obj(entry, (0, _removeBomStream2.default)(), (0, _csvParser2.default)(raw ? undefined : { mapValues }), _through2.default.obj((data, _, cb) => {
       cb(null, { type, data: (0, _lodash2.default)(data) }); // to plain js, out of the CSV format
     }));
     out.add(file);
