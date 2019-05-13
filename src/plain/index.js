@@ -9,17 +9,17 @@ import { singular } from 'pluralize'
 import { finished } from 'stream'
 import bom from 'remove-bom-stream'
 import pickBy from 'lodash.pickby'
-import parseNumber from 'parse-decimal-number'
 
 // light mapping
 const mapValues = ({ value }) => {
   if (value === '') return
   // parse numbers unless it contains - in the middle
-  const n = value.indexOf('-') < 1 && parseNumber(value)
+  const n = value.indexOf('-') < 1 && parseFloat(value)
   if (typeof n === 'number' && !isNaN(n)) return n
   return value
 }
-export default () => {
+
+export default ({ raw = false } = {}) => {
   const out = merge({ end: false })
 
   const dataStream = pumpify.obj(
@@ -34,7 +34,7 @@ export default () => {
       const file = pumpify.obj(
         entry,
         bom(),
-        csv({ mapValues }),
+        csv({ mapValues: raw ? undefined : mapValues }),
         through2.obj((data, _, cb) => {
           cb(null, { type, data: pickBy(data) }) // to plain js, out of the CSV format
         }))

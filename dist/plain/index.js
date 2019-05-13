@@ -40,22 +40,18 @@ var _lodash = require('lodash.pickby');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _parseDecimalNumber = require('parse-decimal-number');
-
-var _parseDecimalNumber2 = _interopRequireDefault(_parseDecimalNumber);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // light mapping
 const mapValues = ({ value }) => {
   if (value === '') return;
   // parse numbers unless it contains - in the middle
-  const n = value.indexOf('-') < 1 && (0, _parseDecimalNumber2.default)(value);
+  const n = value.indexOf('-') < 1 && parseFloat(value);
   if (typeof n === 'number' && !isNaN(n)) return n;
   return value;
 };
 
-exports.default = () => {
+exports.default = ({ raw = false } = {}) => {
   const out = (0, _merge2.default)({ end: false });
 
   const dataStream = _pumpify2.default.obj(_unzipper2.default.Parse(), _through2.default.obj((entry, _, cb) => {
@@ -65,7 +61,7 @@ exports.default = () => {
       return cb();
     }
     const type = (0, _pluralize.singular)((0, _path.basename)(entry.path, ext));
-    const file = _pumpify2.default.obj(entry, (0, _removeBomStream2.default)(), (0, _csvParser2.default)({ mapValues }), _through2.default.obj((data, _, cb) => {
+    const file = _pumpify2.default.obj(entry, (0, _removeBomStream2.default)(), (0, _csvParser2.default)({ mapValues: raw ? undefined : mapValues }), _through2.default.obj((data, _, cb) => {
       cb(null, { type, data: (0, _lodash2.default)(data) }); // to plain js, out of the CSV format
     }));
     out.add(file);

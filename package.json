@@ -1,6 +1,6 @@
 {
   "name": "gtfs-stream",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Streaming GTFS and GTFS-RT parser for node",
   "main": "dist/index.js",
   "keywords": [
@@ -182,7 +182,6 @@
     "gtfs-realtime-bindings": "^0.0.5",
     "lodash.pickby": "^4.6.0",
     "merge2": "^1.2.2",
-    "parse-decimal-number": "^1.0.0",
     "pluralize": "^7.0.0",
     "pumpify": "^1.5.1",
     "remove-bom-stream": "^1.2.0",

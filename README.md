@@ -30,6 +30,8 @@ Data events emitted from the GTFS parse stream have the following shape:
 - data (Object)
   - See https://developers.google.com/transit/gtfs/examples/gtfs-feed for the available attributes of each type
 
+If you want the raw rows, you can pass `{ raw: true }` to this function to skip type inference.
+
 ## GTFS Enhanced
 
 The base GTFS format is cumbersome to work with, so the enhanced parser will do a little extra work piecing things together to make it more usable. This parser will use more memory than the base parser since it needs to collect rows that need formatting while it waits for other to stream in.
