@@ -1,23 +1,18 @@
-'use strict';
+"use strict";
 
 exports.__esModule = true;
+exports.default = void 0;
 
-var _plain = require('./plain');
+var _plain = _interopRequireDefault(require("./plain"));
 
-var _plain2 = _interopRequireDefault(_plain);
+var _enhanced = _interopRequireDefault(require("./enhanced"));
 
-var _enhanced = require('./enhanced');
-
-var _enhanced2 = _interopRequireDefault(_enhanced);
-
-var _rt = require('./rt');
-
-var _rt2 = _interopRequireDefault(_rt);
+var _rt = _interopRequireDefault(require("./rt"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_plain2.default.rt = _rt2.default;
-_plain2.default.enhanced = _enhanced2.default;
-
-exports.default = _plain2.default;
+_plain.default.rt = _rt.default;
+_plain.default.enhanced = _enhanced.default;
+var _default = _plain.default;
+exports.default = _default;
 module.exports = exports.default;

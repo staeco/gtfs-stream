@@ -30,7 +30,6 @@ const collectStopTimes = () => {
   const out = through2.obj((o, _, cb) => {
     if (o.type !== 'stop_time') return cb(null, o) // pass it through
     const stopId = o.data.stop_id
-    //console.log('stop id', stopId)
     if (stopId) {
       if (out.data[stopId]) {
         out.data[stopId].push(o.data)
@@ -61,7 +60,6 @@ const formatObjects = ({ shapes, stopTimes }) => {
     }
     // schedules
     if (o.type === 'stop') {
-      //console.log('fmt stopid', o.data.stop_id)
       const times = stopTimes[o.data.stop_id]
       if (times) o.data.schedule = times
     }

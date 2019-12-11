@@ -2,7 +2,8 @@ import { transit_realtime } from 'gtfs-realtime-bindings'
 import through2 from 'through2'
 
 export default () => {
-  let len = 0, chunks = []
+  let len = 0
+  const chunks = []
   return through2.obj((chunk, enc, cb) => {
     chunks.push(chunk)
     len += chunk.length

@@ -1,7 +1,8 @@
-'use strict';
+"use strict";
 
 exports.__esModule = true;
-exports.default = {
+exports.default = void 0;
+var _default = {
   // Core types - from: https://developers.google.com/transit/gtfs/reference/#routestxt
   '0': 'Light rail',
   '1': 'Subway',
@@ -10,7 +11,6 @@ exports.default = {
   '5': 'Cable tram',
   '6': 'Aerial lift',
   '7': 'Funicular',
-
   // Extended types - from: https://developers.google.com/transit/gtfs/reference/extended-route-types
   '100': 'Railway',
   '101': 'High Speed Rail',
@@ -140,4 +140,5 @@ exports.default = {
   '1604': 'Hire Cycle',
   '1700': 'Miscellaneous'
 };
+exports.default = _default;
 module.exports = exports.default;
