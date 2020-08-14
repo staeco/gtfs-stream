@@ -1,6 +1,6 @@
 {
   "name": "gtfs-stream",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Streaming GTFS and GTFS-RT parser for node",
   "main": "dist/index.js",
   "keywords": [
@@ -68,6 +68,7 @@
     "merge2": "^1.2.2",
     "pluralize": "^8.0.0",
     "pumpify": "^2.0.0",
+    "readable-stream": "^3.6.0",
     "remove-bom-stream": "^1.2.0",
     "through2": "^4.0.0",
     "unzipper": "^0.10.1"

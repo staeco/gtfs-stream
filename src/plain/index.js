@@ -6,7 +6,7 @@ import through2 from 'through2'
 import zip from 'unzipper'
 import csv from 'csv-parser'
 import { singular } from 'pluralize'
-import { finished } from 'stream'
+import { finished } from 'readable-stream'
 import bom from 'remove-bom-stream'
 import pickBy from 'lodash.pickby'
 
