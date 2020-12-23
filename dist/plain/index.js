@@ -19,7 +19,7 @@ var _csvParser = _interopRequireDefault(require("csv-parser"));
 
 var _pluralize = require("pluralize");
 
-var _readableStream = require("readable-stream");
+var _stream = require("stream");
 
 var _removeBomStream = _interopRequireDefault(require("remove-bom-stream"));
 
@@ -65,10 +65,10 @@ var _default = ({
     }));
 
     out.add(file);
-    (0, _readableStream.finished)(file, cb);
+    (0, _stream.finished)(file, cb);
   }));
 
-  (0, _readableStream.finished)(dataStream, () => {
+  (0, _stream.finished)(dataStream, () => {
     out.push(null);
     out.end();
   });

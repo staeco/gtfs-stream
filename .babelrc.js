@@ -5,7 +5,7 @@ module.exports = {
   env: {
     ...core.env,
     testing: {
-      ...core.env.testing,
+      ...core.env?.testing,
       plugins: [ 'istanbul' ]
     }
   }
