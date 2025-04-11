@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import { Transform } from 'stream'
 import through2 from 'through2'
 import pumpify from 'pumpify'
