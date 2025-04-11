@@ -18,6 +18,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-explicit-any': 'warn',
     'semi': ['error', 'never'],
     'quotes': ['error', 'single'],
     'no-trailing-spaces': 'error'
