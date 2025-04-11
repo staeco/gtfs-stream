@@ -6,7 +6,7 @@ import csv from 'csv-parser'
 import { singular } from 'pluralize'
 import bom from 'remove-bom-stream'
 import pickBy from 'lodash.pickby'
-import { GtfsData } from '../types'
+import { GtfsObject } from '../types'
 import pumpify from 'pumpify'
 
 interface PlainOptions {
@@ -43,7 +43,7 @@ export default ({ raw = false }: PlainOptions = {}): Transform => {
       .pipe(parser)
       .on('data', (data: Record<string, unknown>) => {
         // Push data into the transform stream
-        this.push(pickBy(data) as GtfsData)
+        this.push({ type, data: pickBy(data) } as GtfsObject)
       })
       .on('end', callback)
       .on('error', callback)

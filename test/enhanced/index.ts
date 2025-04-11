@@ -4,35 +4,40 @@ import streamify from 'into-stream'
 import { createReadStream } from 'fs'
 import { join } from 'path'
 import enhanced from '../../src/enhanced'
-import { GtfsObject } from '../../src/types'
+import { EnhancedGtfsObject } from '../../src/types'
 
-// Use the same test file as plain for now
-const gtfsFixture = join(__dirname, '../plain/sample-feed.zip')
+const gtfsFixture = join(__dirname, 'norway.zip')
+const gtfsFixture2 = join(__dirname, 'nyc.zip')
 
 describe('gtfs enhanced', () => {
-  it('should parse sample feed', async () => {
+  it('should parse norway feed', async () => {
     const stream = createReadStream(gtfsFixture).pipe(enhanced())
-    const res = await collect.array<GtfsObject>(stream)
+    const res = await collect.array<EnhancedGtfsObject>(stream)
     should.exist(res)
-    // Enhanced stream returns fewer objects as it processes and combines data
-    should.equal(res.length, 46)
-
-    // Check that the enhanced module doesn't break anything
-    // Note: This test file may not have trips with paths or stops with schedules
+    should.equal(res.length, 71843)
     const trips = res.filter((i) => i.type === 'trip')
+    should(trips.some((i) => i.data.path && i.data.path.coordinates)).equal(true)
     const stops = res.filter((i) => i.type === 'stop')
-    should.exist(trips)
-    should.exist(stops)
+    should(stops.some((i) => i.data.schedule && i.data.schedule.length)).equal(true)
   })
-
+  it('should parse nyc feed', async () => {
+    const stream = createReadStream(gtfsFixture2).pipe(enhanced())
+    const res = await collect.array<EnhancedGtfsObject>(stream)
+    should.exist(res)
+    should.equal(res.length, 32123)
+    const trips = res.filter((i) => i.type === 'trip')
+    should(trips.some((i) => i.data.path && i.data.path.coordinates)).equal(true)
+    const stops = res.filter((i) => i.type === 'stop')
+    should(stops.some((i) => i.data.schedule && i.data.schedule.length)).equal(true)
+  })
   it('should error on invalid object', async () => {
     const sample = 'aksndflaks'
     const stream = streamify(sample).pipe(enhanced())
-    let theError: Error | undefined
+    let theError
     try {
-      await collect.array(stream)
+      await collect.array<EnhancedGtfsObject>(stream)
     } catch (err) {
-      theError = err as Error
+      theError = err
     }
     should.exist(theError)
   })

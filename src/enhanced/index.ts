@@ -5,8 +5,8 @@ import routeTypes from './routeTypes'
 import locationTypes from './locationTypes'
 import wheelchairTypes from './wheelChairTypes'
 import plain from '../plain'
-import { EnhancedGtfsObject, EnhancedGtfsData, GtfsObject } from '../types'
-import { Route, Shapes, Stop, StopTime } from 'gtfs-types'
+import { EnhancedGtfsObject, GtfsObject } from '../types'
+import { Route, Shapes, Stop, StopTime, Trip } from 'gtfs-types'
 
 export interface GtfsShapesCollector extends Transform {
   data: {
@@ -95,10 +95,10 @@ export default (): Transform => {
       // Process all queued objects now that we have all the data
       waitingObjects.forEach((obj) => {
         // Enhance with shape data if available
-        if (obj.type === 'shape') {
-          obj.data = obj.data as Shapes
+        if (obj.type === 'trip') {
+          obj.data = obj.data as Trip
           if (obj.data.shape_id && shapes[obj.data.shape_id]) {
-            // @ts-ignore
+            // @ts-expect-error - path property does not exist on Trip type
             obj.data.path = {
               type: 'LineString',
               coordinates: shapes[obj.data.shape_id]
@@ -111,7 +111,7 @@ export default (): Transform => {
 
           // Add schedules to stops
           if (obj.data.stop_id && stopTimes[obj.data.stop_id]) {
-            // @ts-ignore
+            // @ts-expect-error - schedule property does not exist on Stop type
             obj.data.schedule = stopTimes[obj.data.stop_id]
           }
 
@@ -149,7 +149,7 @@ export default (): Transform => {
           }
         }
 
-        this.push(obj)
+        this.push(obj as EnhancedGtfsObject)
       })
 
       cb()

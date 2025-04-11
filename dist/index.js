@@ -11,11 +11,7 @@ var bom = require('remove-bom-stream');
 var pickBy = require('lodash.pickby');
 var pumpify = require('pumpify');
 var gtfsRtBindings = require('gtfs-rt-bindings');
-var gtfsTypes = require('gtfs-types');
 
-/**
- * CSV mapValues function to convert values to the appropriate types
- */
 const mapValues = ({ value }) => {
     if (value === '')
         return undefined;
@@ -25,23 +21,8 @@ const mapValues = ({ value }) => {
         return n;
     return value;
 };
-/**
- * Helper function to create a plain GTFS object with proper typing
- */
-function createPlainObject(type, data) {
-    return {
-        type,
-        data: pickBy(data)
-    };
-}
-/**
- * Creates a transform stream that parses a GTFS feed and emits PlainGtfsObject objects.
- *
- * @param options Options for the parser
- * @returns A transform stream that outputs PlainGtfsObject objects
- */
+// Create a transform stream that will process ZIP entries and emit GTFS objects
 var plain = ({ raw = false } = {}) => {
-    // Create a transform stream that will process ZIP entries and emit GTFS objects
     const transform = through2.obj(function (entry, _, callback) {
         const ext = path.extname(entry.path);
         if (ext !== '.txt') {
@@ -56,7 +37,7 @@ var plain = ({ raw = false } = {}) => {
             .pipe(parser)
             .on('data', (data) => {
             // Push data into the transform stream
-            this.push(createPlainObject(type, data));
+            this.push({ type, data: pickBy(data) });
         })
             .on('end', callback)
             .on('error', callback);
@@ -65,11 +46,6 @@ var plain = ({ raw = false } = {}) => {
     return pumpify.obj(zip.Parse(), transform);
 };
 
-/**
- * Creates a transform stream that parses a GTFS-RT feed and emits Entity objects.
- *
- * @returns A transform stream that outputs GTFS-RT Entity objects
- */
 var index$1 = () => {
     let len = 0;
     const chunks = [];
@@ -82,7 +58,9 @@ var index$1 = () => {
         try {
             const feed = gtfsRtBindings.FeedMessage.decode(fullValue);
             if (feed.entity) {
-                feed.entity.forEach((v) => this.push(v));
+                feed.entity.forEach((entity) => {
+                    this.push(entity);
+                });
             }
             return cb();
         }
@@ -93,41 +71,17 @@ var index$1 = () => {
 };
 
 /**
- * Human-readable route types that correspond to the gtfs-types VehicleType enum
- */
-var EnhancedRouteType;
-(function (EnhancedRouteType) {
-    EnhancedRouteType["LIGHT_RAIL"] = "light rail";
-    EnhancedRouteType["SUBWAY"] = "subway";
-    EnhancedRouteType["BUS"] = "bus";
-    EnhancedRouteType["FERRY"] = "ferry";
-    EnhancedRouteType["CABLE_TRAM"] = "cable tram";
-    EnhancedRouteType["AERIAL_LIFT"] = "aerial lift";
-    EnhancedRouteType["FUNICULAR"] = "funicular";
-    // Extended types could be added here as needed
-})(EnhancedRouteType || (EnhancedRouteType = {}));
-/**
- * Human-readable location types that correspond to the gtfs-types LocationType enum
- */
-var EnhancedLocationType;
-(function (EnhancedLocationType) {
-    EnhancedLocationType["STOP"] = "stop";
-    EnhancedLocationType["STATION"] = "station";
-    EnhancedLocationType["ENTRANCE_EXIT"] = "station entrance";
-})(EnhancedLocationType || (EnhancedLocationType = {}));
-
-/**
- * Mapping from GTFS numeric route types to human-readable enum values
+ * Mapping from GTFS numeric route types to human-readable string values
  */
 const routeTypes = {
     // Core types - from: https://developers.google.com/transit/gtfs/reference/#routestxt
-    '0': EnhancedRouteType.LIGHT_RAIL,
-    '1': EnhancedRouteType.SUBWAY,
-    '3': EnhancedRouteType.BUS,
-    '4': EnhancedRouteType.FERRY,
-    '5': EnhancedRouteType.CABLE_TRAM,
-    '6': EnhancedRouteType.AERIAL_LIFT,
-    '7': EnhancedRouteType.FUNICULAR,
+    '0': 'light rail',
+    '1': 'subway',
+    '3': 'bus',
+    '4': 'ferry',
+    '5': 'cable tram',
+    '6': 'aerial lift',
+    '7': 'funicular',
     // Extended types - from: https://developers.google.com/transit/gtfs/reference/extended-route-types
     '100': 'railway',
     '101': 'high speed rail',
@@ -259,51 +213,30 @@ const routeTypes = {
 };
 
 /**
- * Mapping from GTFS numeric location types to human-readable enum values
+ * Mapping from GTFS numeric location types to human-readable string values
  */
 const locationTypes = {
-    '0': EnhancedLocationType.STOP,
-    '1': EnhancedLocationType.STATION,
-    '2': EnhancedLocationType.ENTRANCE_EXIT
+    '0': 'stop',
+    '1': 'station',
+    '2': 'station entrance',
+    '3': 'generic node',
+    '4': 'boarding area'
 };
 
 const wheelchairTypes = {
-    '0': gtfsTypes.WheelchairBoardingType.UNKNOWN_OR_INHERIT,
-    '1': gtfsTypes.WheelchairBoardingType.ACCESSIBLE,
-    '2': gtfsTypes.WheelchairBoardingType.NOT_ACCESSIBLE
+    '0': 'unknown_or_inherit',
+    '1': 'accessible',
+    '2': 'not_accessible'
 };
 
-/**
- * Helper to check if an object needs to queue for post-processing
- */
-const shouldQueue = (o) => Boolean(o.data.shape_id ||
-    o.type === 'stop' ||
-    o.data.route_type ||
-    o.data.location_type ||
-    o.data.vehicle_type ||
-    o.data.wheelchair_boarding);
-/**
- * Creates a transform stream that parses a GTFS feed and emits EnhancedGtfsObject objects.
- *
- * The enhanced stream:
- * - Collects shape points into GeoJSON LineString coordinates
- * - Associates stop times with stops for easy scheduling lookup
- * - Converts numeric route types to human-readable values
- * - Converts numeric location types to human-readable values
- * - Converts numeric wheelchair boarding types to boolean values
- *
- * @returns A transform stream that outputs EnhancedGtfsObject objects
- */
-/**
- * Helper function to convert a GtfsObject to an EnhancedGtfsObject
- * This helps TypeScript understand the enhanced nature of our output objects
- */
-function enhanceObject(obj) {
-    return {
-        type: obj.type,
-        data: obj.data
-    };
-}
+const shouldQueue = (o) => {
+    var _a, _b, _c, _d;
+    return Boolean(((_a = o.data) === null || _a === void 0 ? void 0 : _a.shape_id) ||
+        o.type === 'stop' ||
+        ((_b = o.data) === null || _b === void 0 ? void 0 : _b.route_type) ||
+        ((_c = o.data) === null || _c === void 0 ? void 0 : _c.location_type) ||
+        ((_d = o.data) === null || _d === void 0 ? void 0 : _d.wheelchair_boarding));
+};
 var index = () => {
     // Data storage
     const shapes = {};
@@ -313,6 +246,7 @@ var index = () => {
     const enhancer = through2.obj(function (obj, _, callback) {
         // Collect shapes
         if (obj.type === 'shape') {
+            obj.data = obj.data;
             const id = obj.data.shape_id;
             // Ensure shape_pt_lon and shape_pt_lat are numbers
             const shapePtLon = typeof obj.data.shape_pt_lon === 'number'
@@ -332,14 +266,14 @@ var index = () => {
         }
         // Collect stop times
         if (obj.type === 'stop_time') {
+            obj.data = obj.data;
             const stopId = obj.data.stop_id;
             if (stopId) {
-                const stopTimeData = obj.data;
                 if (stopTimes[stopId]) {
-                    stopTimes[stopId].push(stopTimeData);
+                    stopTimes[stopId].push(obj.data);
                 }
                 else {
-                    stopTimes[stopId] = [stopTimeData];
+                    stopTimes[stopId] = [obj.data];
                 }
             }
             return callback();
@@ -350,54 +284,63 @@ var index = () => {
             return callback();
         }
         // Pass through other objects immediately
-        this.push(enhanceObject(obj));
+        this.push(obj);
         callback();
     }, function (cb) {
         // Process all queued objects now that we have all the data
         waitingObjects.forEach((obj) => {
             // Enhance with shape data if available
-            if (obj.data.shape_id && shapes[obj.data.shape_id]) {
-                obj.data.path = {
-                    type: 'LineString',
-                    coordinates: shapes[obj.data.shape_id]
-                };
+            if (obj.type === 'trip') {
+                obj.data = obj.data;
+                if (obj.data.shape_id && shapes[obj.data.shape_id]) {
+                    // @ts-expect-error - path property does not exist on Trip type
+                    obj.data.path = {
+                        type: 'LineString',
+                        coordinates: shapes[obj.data.shape_id]
+                    };
+                }
             }
-            // Add schedules to stops
-            if (obj.type === 'stop' && obj.data.stop_id && stopTimes[obj.data.stop_id]) {
-                obj.data.schedule = stopTimes[obj.data.stop_id];
+            if (obj.type === 'stop') {
+                obj.data = obj.data;
+                // Add schedules to stops
+                if (obj.data.stop_id && stopTimes[obj.data.stop_id]) {
+                    // @ts-expect-error - schedule property does not exist on Stop type
+                    obj.data.schedule = stopTimes[obj.data.stop_id];
+                }
+                // Convert location types to human-readable strings
+                if (obj.data.location_type !== undefined) {
+                    const locationTypeKey = String(obj.data.location_type || '0');
+                    const humanLocationType = locationTypes[locationTypeKey];
+                    if (humanLocationType)
+                        obj.data.location_type = humanLocationType;
+                }
+                // Convert wheelchair boarding to boolean if it exists
+                if (obj.data.wheelchair_boarding !== undefined) {
+                    const wheelchairKey = String(obj.data.wheelchair_boarding);
+                    obj.data.wheelchair_boarding = wheelchairTypes[wheelchairKey];
+                }
             }
             // Convert route types to human-readable strings
-            if (obj.data.route_type !== undefined) {
-                const routeTypeKey = String(obj.data.route_type);
-                const humanRouteType = routeTypes[routeTypeKey];
-                if (humanRouteType) {
-                    // Use type assertion to treat the string as our enum type
-                    // and then tell TypeScript it's compatible with the expected types
-                    obj.data.route_type = humanRouteType;
+            if (obj.type == 'route') {
+                obj.data = obj.data;
+                if (obj.data.route_type !== undefined) {
+                    const routeTypeKey = String(obj.data.route_type);
+                    const humanRouteType = routeTypes[routeTypeKey];
+                    if (humanRouteType)
+                        obj.data.route_type = humanRouteType;
                 }
             }
-            // Convert vehicle types to human-readable strings
-            if (obj.data.vehicle_type !== undefined) {
-                const vehicleTypeKey = String(obj.data.vehicle_type);
-                const humanVehicleType = routeTypes[vehicleTypeKey];
-                if (humanVehicleType) {
-                    obj.data.vehicle_type = humanVehicleType;
+            // Convert route types to human-readable strings
+            if (obj.type == 'route') {
+                obj.data = obj.data;
+                if (obj.data.route_type !== undefined) {
+                    const vehicleTypeKey = String(obj.data.route_type);
+                    const humanVehicleType = routeTypes[vehicleTypeKey];
+                    if (humanVehicleType)
+                        obj.data.route_type = humanVehicleType;
                 }
             }
-            // Convert location types to human-readable strings
-            if (obj.data.location_type !== undefined) {
-                const locationTypeKey = String(obj.data.location_type || '0');
-                const humanLocationType = locationTypes[locationTypeKey];
-                if (humanLocationType) {
-                    obj.data.location_type = humanLocationType;
-                }
-            }
-            // Convert wheelchair boarding to boolean or null
-            if (obj.data.wheelchair_boarding !== undefined) {
-                const wheelchairKey = String(obj.data.wheelchair_boarding);
-                obj.data.wheelchair_boarding = wheelchairTypes[wheelchairKey];
-            }
-            this.push(enhanceObject(obj));
+            this.push(obj);
         });
         cb();
     });

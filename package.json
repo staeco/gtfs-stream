@@ -59,7 +59,7 @@
     "lint": "eslint --ext .ts src test",
     "lint:fix": "eslint --ext .ts src test --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
     "test": "NODE_ENV=testing cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc mocha --require ts-node/register --timeout 36000 test/**/*.ts",
     "coverage": "nyc report --reporter=text-lcov > coverage/lcov.info"
   },
