@@ -3,7 +3,7 @@
   <p align='center'>Streaming GTFS and GTFS-RT parser for node.</p>
 </p>
 
-# gtfs-stream [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url]
+# gtfs-stream [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![TypeScript][typescript-image]][typescript-url]
 
 
 ## Install
@@ -14,11 +14,11 @@ npm install gtfs-stream --save
 
 ## Plain GTFS
 
-```js
-import gtfs from 'gtfs-stream'
+```ts
+import { plain } from 'gtfs-stream'
 
 request.get('https://developers.google.com/transit/gtfs/examples/sample-feed.zip') // or any other way of getting the data stream
-  .pipe(gtfs())
+  .pipe(plain())
   .on('data', (entity) => {
     console.log(entity)
   })
@@ -30,17 +30,17 @@ Data events emitted from the GTFS parse stream have the following shape:
 - data (Object)
   - See https://developers.google.com/transit/gtfs/examples/gtfs-feed for the available attributes of each type
 
-If you want the raw rows, you can pass `{ raw: true }` to this function to skip type inference.
+If you want the raw rows, you can pass `{ raw: true }` to this function to skip type inference. This library also provides TypeScript type definitions for all GTFS entities.
 
 ## GTFS Enhanced
 
 The base GTFS format is cumbersome to work with, so the enhanced parser will do a little extra work piecing things together to make it more usable. This parser will use more memory than the base parser since it needs to collect rows that need formatting while it waits for other to stream in.
 
-```js
-import gtfs from 'gtfs-stream'
+```ts
+import { enhanced } from 'gtfs-stream'
 
 request.get('https://developers.google.com/transit/gtfs/examples/sample-feed.zip') // or any other way of getting the data stream
-  .pipe(gtfs.enhanced())
+  .pipe(enhanced())
   .on('data', (entity) => {
     console.log(entity)
   })
@@ -54,16 +54,16 @@ Differences from the base parser:
 - `trip` types have a new `path` attribute that is a GeoJSON LineString, and `shape_id` is removed
 - `stop` types have a new `schedule` attribute that is a collection of stop times
 - `route` types have a human-readable `route_type`
-- `stop` types have a human-readable `vehicle_type`, `location_type`, and `wheelchair_boarding`
+- `stop` types have a human-readable `location_type` and `wheelchair_boarding`
 - No `shape` or `stop_time` types, since they are collected into their relevant entries
 
 ## GTFS-RT
 
-```js
-import gtfs from 'gtfs-stream'
+```ts
+import { rt } from 'gtfs-stream'
 
 request.get('http://datamine.mta.info/mta_esi.php') // or any other way of getting the data stream
-  .pipe(gtfs.rt())
+  .pipe(rt())
   .on('data', (entity) => {
     console.log(entity)
   })
@@ -115,3 +115,5 @@ Only one of either trip_update, vehicle, or alert will be present in any given e
 [downloads-image]: http://img.shields.io/npm/dm/gtfs-stream.svg
 [npm-url]: https://npmjs.org/package/gtfs-stream
 [npm-image]: http://img.shields.io/npm/v/gtfs-stream.svg
+[typescript-image]: https://img.shields.io/badge/TypeScript-blue.svg
+[typescript-url]: https://www.typescriptlang.org/

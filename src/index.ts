@@ -4,6 +4,7 @@ import enhanced from './enhanced'
 
 export { plain, rt, enhanced }
 
-// Export type definitions: TODO
+// Export types
+export * from './types'
 
 export default plain
