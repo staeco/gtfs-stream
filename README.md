@@ -3,7 +3,7 @@
   <p align='center'>Streaming GTFS and GTFS-RT parser for node.</p>
 </p>
 
-# gtfs-stream [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url]
+# gtfs-stream [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url]
 
 
 ## Install
@@ -115,6 +115,3 @@ Only one of either trip_update, vehicle, or alert will be present in any given e
 [downloads-image]: http://img.shields.io/npm/dm/gtfs-stream.svg
 [npm-url]: https://npmjs.org/package/gtfs-stream
 [npm-image]: http://img.shields.io/npm/v/gtfs-stream.svg
-
-[travis-url]: https://travis-ci.org/staeco/gtfs-stream
-[travis-image]: https://travis-ci.org/staeco/gtfs-stream.png?branch=master

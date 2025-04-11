@@ -25,3 +25,6 @@ coverage
 .idea
 sandbox
 .nyc_output
+dist
+.vscode
+*.tsbuildinfo
